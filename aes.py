@@ -92,6 +92,28 @@ def inv_sub_bytes(state):
     return __sub_bytes(state, inv_sbox)
 
 
+def __shift_rows(state,indexes):
+    tmp = state[0][1]
+    state[0][1] = state[1][1]
+    state[1][1] = state[2][1]
+    state[2][1] = state[3][1]
+    state[3][1] = tmp
+
+    tmp = state[0][2]
+    state[0][2] = state[2][2]
+    state[2][2] = tmp
+    tmp = state[1][2]
+    state[1][2] = state[3][2]
+    state[3][2] = tmp
+
+    tmp = state[0][3]
+    state[0][3] = state[3][3]
+    state[3][3] = state[2][3]
+    state[2][3] = state[1][3]
+    state[1][3] = tmp
+
+    return state
+
 # each row in the state is shifted to left
 # with its rownumber.
 def shift_rows(state):
@@ -268,7 +290,6 @@ def strify(state, _format):
 
     if _format == 'x':
         return ''.join(format(e,'02x') for e in state)
-
 
     return ''.join(str(e) for e in encrypted)
 
