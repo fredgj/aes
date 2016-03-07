@@ -166,7 +166,6 @@ def gmul(a,b):
     return p
 
 
-
 def __mix_columns(state,vector):
     for i in range(4):
         a,b,c,d = state[i]
