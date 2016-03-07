@@ -271,7 +271,9 @@ def strify(state, _format):
     return ''.join(str(e) for e in encrypted)
 
 
-# format is either b for byte or x for hex
+# Takes a 128 bit block of plaintext and a key (128, 192 or 256 bit)
+# and returns ciphertext.
+# Format is either b for byte or x for hex
 def encrypt(block, key, _format='b'):
     state, roundkey, nr = init(block, key, _format)
     state = add_roundkey(0, roundkey, state)
@@ -291,8 +293,9 @@ def encrypt(block, key, _format='b'):
     return strify(state, _format)
 
 
-
-# format is either b for byte or x for hex
+# Takes a 128 bit block of ciphertext and a key (128, 192 or 256 bit)
+# and returns plaintext
+# Format is either b for byte or x for hex
 def decrypt(block, key, _format='b'):
     state, roundkey, nr = init(block, key, _format)
     state = add_roundkey(nr, roundkey, state)
