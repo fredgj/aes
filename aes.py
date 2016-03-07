@@ -10,9 +10,9 @@ class BlockSizeError(Exception):
 
 
 S = (0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
-	 0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF, 0x9C, 0xA4, 0x72, 0xC0,
+     0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF, 0x9C, 0xA4, 0x72, 0xC0,
      0xB7, 0xFD, 0x93, 0x26, 0x36, 0x3F, 0xF7, 0xCC, 0x34, 0xA5, 0xE5, 0xF1, 0x71, 0xD8, 0x31, 0x15,
-	 0x04, 0xC7, 0x23, 0xC3, 0x18, 0x96, 0x05, 0x9A, 0x07, 0x12, 0x80, 0xE2, 0xEB, 0x27, 0xB2, 0x75,
+     0x04, 0xC7, 0x23, 0xC3, 0x18, 0x96, 0x05, 0x9A, 0x07, 0x12, 0x80, 0xE2, 0xEB, 0x27, 0xB2, 0x75,
      0x09, 0x83, 0x2C, 0x1A, 0x1B, 0x6E, 0x5A, 0xA0, 0x52, 0x3B, 0xD6, 0xB3, 0x29, 0xE3, 0x2F, 0x84,
      0x53, 0xD1, 0x00, 0xED, 0x20, 0xFC, 0xB1, 0x5B, 0x6A, 0xCB, 0xBE, 0x39, 0x4A, 0x4C, 0x58, 0xCF,
      0xD0, 0xEF, 0xAA, 0xFB, 0x43, 0x4D, 0x33, 0x85, 0x45, 0xF9, 0x02, 0x7F, 0x50, 0x3C, 0x9F, 0xA8,
@@ -65,20 +65,31 @@ RCON = (0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 
         0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d)
 
 
+def sbox(i):
+    return S[i]
+
+
+def inv_sbox(i):
+    return INV_S[i]
+
+
 # each byte in the state is replaces with
 # a value from a fixed table
+def __sub_bytes(state,box):
+    for i in range(4):
+        for j in range(4):
+            state[i][j] = box(state[i][j])
+    return state
+
+
+# wrapper for __sub_bytes, used for encryption
 def sub_bytes(state):
-    for i in range(4):
-        for j in range(4):
-            state[i][j] = S[state[i][j]]
-    return state
+    return __sub_bytes(state, sbox)
 
 
+# wrapper for __sub_bytes, used for decryption
 def inv_sub_bytes(state):
-    for i in range(4):
-        for j in range(4):
-            state[i][j] = INV_S[state[i][j]]
-    return state
+    return __sub_bytes(state, inv_sbox)
 
 
 # each row in the state is shifted to left
@@ -155,36 +166,30 @@ def gmul(a,b):
     return p
 
 
-# multiplies each columns with the polynomial c(x) = 3x^3 + x^2 + x + 2
-def mix_columns(state):
-    for i in range(4):
-        a = state[i][0]
-        b = state[i][1]
-        c = state[i][2]
-        d = state[i][3]
 
-        state[i][0] = gmul(a,2) ^ gmul(b,3) ^ gmul(c,1) ^ gmul(d,1)
-        state[i][1] = gmul(a,1) ^ gmul(b,2) ^ gmul(c,3) ^ gmul(d,1)
-        state[i][2] = gmul(a,1) ^ gmul(b,1) ^ gmul(c,2) ^ gmul(d,3)
-        state[i][3] = gmul(a,3) ^ gmul(b,1) ^ gmul(c,1) ^ gmul(d,2)
+def __mix_columns(state,vector):
+    for i in range(4):
+        a,b,c,d = state[i]
+        v1,v2,v3,v4 = vector
+
+        state[i][0] = gmul(a,v1) ^ gmul(b,v2) ^ gmul(c,v3) ^ gmul(d,v4)
+        state[i][1] = gmul(a,v4) ^ gmul(b,v1) ^ gmul(c,v2) ^ gmul(d,v3)
+        state[i][2] = gmul(a,v3) ^ gmul(b,v4) ^ gmul(c,v1) ^ gmul(d,v2)
+        state[i][3] = gmul(a,v2) ^ gmul(b,v3) ^ gmul(c,v4) ^ gmul(d,v1)
 
     return state
+
+
+# multiplies each columns with the polynomial c(x) = 3x^3 + x^2 + x + 2
+def mix_columns(state):
+    vector = [2,3,1,1]
+    return __mix_columns(state,vector)
 
 
 # multiplies each columns with the polynomial c(x) = 11x^3 + 13x^2 + 9x + 14
 def inv_mixcolumns(state):
-    for i in range(4):
-        a = state[i][0]
-        b = state[i][1]
-        c = state[i][2]
-        d = state[i][3]
-
-        state[i][0] = gmul(a,14) ^ gmul(b,11) ^ gmul(c,13) ^ gmul(d,9)
-        state[i][1] = gmul(a,9)  ^ gmul(b,14) ^ gmul(c,11) ^ gmul(d,13)
-        state[i][2] = gmul(a,13) ^ gmul(b,9)  ^ gmul(c,14) ^ gmul(d,11)
-        state[i][3] = gmul(a,11) ^ gmul(b,13) ^ gmul(c,9)  ^ gmul(d,14)
-
-    return state
+    vector = [14,11,13,9]
+    return __mix_columns(state, vector)
 
 
 # expands key into a (nr+1)*16 table, so there are (nr+1)*4 roundkeys.
@@ -232,8 +237,8 @@ def valid_key(key, keysize):
     return keysize==128 or keysize==192 or keysize==256
 
 
-# format is either b for byte or x for hex
-def encrypt(block, key, _format='b'):
+# initialize state and roundkey
+def init(block, key, _format):
     if _format == 'x':
         key = [chr(int(k,16)) for k in chunkify(key,2)]
         block = [chr(int(b,16)) for b in chunkify(block,2)]
@@ -253,8 +258,27 @@ def encrypt(block, key, _format='b'):
     nr = nk+6
 
     roundkey = key_expand(key, nr, nk)
-    state = add_roundkey(0, roundkey, state)
 
+    return state,roundkey,nr
+
+
+# takes a state and returns the state as a string
+def strify(state, _format):
+    state = (b for s in state for b in s)
+
+    if _format == 'x':
+        return ''.join(format(e,'02x') for e in state)
+
+
+    return ''.join(str(e) for e in encrypted)
+
+
+# format is either b for byte or x for hex
+def encrypt(block, key, _format='b'):
+    state, roundkey, nr = init(block, key, _format)
+    state = add_roundkey(0, roundkey, state)
+    
+    # round 1..nr
     for i in range(1,nr):
         state = sub_bytes(state)
         state = shift_rows(state)
@@ -266,38 +290,16 @@ def encrypt(block, key, _format='b'):
     state = shift_rows(state)
     state = add_roundkey(nr, roundkey, state)
 
-    encrypted = (b for s in state for b in s)
+    return strify(state, _format)
 
-    if _format == 'x':
-        return ''.join(format(e,'02x') for e in encrypted)
-
-
-    return ''.join(str(e) for e in encrypted)
 
 
 # format is either b for byte or x for hex
 def decrypt(block, key, _format='b'):
-    if _format == 'x':
-        key = [chr(int(k,16)) for k in chunkify(key,2)]
-        block = [chr(int(b,16)) for b in chunkify(block,2)]
-
-    key = [ord(k) for k in key]
-    keysize = len(key)*8
-
-    if len(block) != 16:
-        raise BlockSizeError('Block must be of length 16 bytes')
-    if not valid_key(key,keysize):
-        raise KeySizeError('Key must be either 128 bit/16 byte, 192 bit/24 byte or 256 bit/32 byte')
-
-    state = [ord(b) for b in block]
-    state = [state[i:i+4] for i in range(0,len(state)-3, 4)]
-
-    nk = keysize//32
-    nr = nk+6
-
-    roundkey = key_expand(key, nr, nk)
+    state, roundkey, nr = init(block, key, _format)
     state = add_roundkey(nr, roundkey, state)
 
+    # round nr-1..0
     for i in range(nr-1, 0, -1):
         state = inv_shift_rows(state)
         state = inv_sub_bytes(state)
@@ -309,11 +311,5 @@ def decrypt(block, key, _format='b'):
     state = inv_sub_bytes(state)
     state = add_roundkey(0, roundkey, state)
 
-    decrypted = (b for s in state for b in s)
-
-    if _format == 'x':
-        return ''.join(format(e,'02x') for e in decrypted)
-
-
-    return ''.join(str(d) for d in decrypted)
+    return strify(state, _format)
 
