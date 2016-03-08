@@ -196,7 +196,7 @@ def inv_mixcolumns(state):
 # for each round. Supports 128, 192 and 256 bit keys.
 def key_expand(key, nr, nk):
     expanded = [k for k in key]
-    tmp = []
+    tmp = [0]*4
     rcon_iter = 1
 
     # size is either 16, 24 or 42 byte
@@ -210,7 +210,7 @@ def key_expand(key, nr, nk):
     while currentsize < expanded_keysize:
 
         for i in range(4):
-            tmp.append(expanded[(currentsize-4)+i])
+            tmp[i] = expanded[(currentsize-4)+i]
 
         if currentsize%size == 0:
             tmp = rotate(tmp)
@@ -228,7 +228,7 @@ def key_expand(key, nr, nk):
         for i in range(4):
             expanded.append(expanded[currentsize-size]^tmp[i])
             currentsize += 1
-        tmp = []
+
     return expanded
 
 
@@ -261,7 +261,7 @@ def init(block, key, _format):
     return state,roundkey,nr
 
 
-# takes a state and returns the state as a string
+# takes a state as input and returns the state as a string
 def strify(state, _format):
     state = (b for s in state for b in s)
 
