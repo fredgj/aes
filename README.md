@@ -25,7 +25,7 @@ $$
 
 I have choosen a slightly different layout:
 
-$$\mathbf{M} = \left[\begin{array}
+$$\mathbf{State} = \left[\begin{array}
 {llll}
 b_{0}  & b_{1}  & b_{2}  & b_{3}\\
 b_{4}  & b_{5}  & b_{6}  & b_{7}\\
