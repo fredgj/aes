@@ -15,26 +15,26 @@ Rather than going for the tradidional state and key layout decribed in
 the AES specification:
 
 ```
-       ┌               ┐
-       │ b0 b4 b8  b12 │   
+         ┌                      ┐
+         │ b0 b4 b8  b12 │   
    M = │ b1 b5 b9  b13 │
-       │ b2 b6 b10 b14 │
-       │ b3 b7 b11 b15 │
-       └               ┘
+         │ b2 b6 b10 b14 │
+         │ b3 b7 b11 b15 │
+         └                      ┘
 ```
 
 I have choosen a slightly different layout for the state, with a similar one dimensional layout for the key:
 
 ```
-       ┌                 ┐
-       │ b0  b1  b2  b3  │   
+         ┌                      ┐
+         │ b0  b1  b2  b3  │   
    S = │ b4  b5  b6  b7  │
-       │ b8  b9  b10 b11 │
-       │ b12 b13 b14 b15 │
-       └                 ┘
-       ┌           ┐
+         │ b8  b9  b10 b11 │
+         │ b12 b13 b14 b15 │
+         └                      ┘
+         ┌           ┐
    K = │ b1 ... bn │
-       └           ┘
+         └           ┘
 ```
 
 A layout like this keeps the implementation much more straight forward.
