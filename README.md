@@ -14,7 +14,8 @@ Design
 Rather than going for the tradidional state and key layout decribed in
 the AES specification:
 
-$$\mathbf{M} = \left[\begin{array}
+$$
+M = \left[\begin{array}
 {llll}
 b_{0} & b_{4} & b_{8}  & b_{12}\\
 b_{1} & b_{5} & b_{9}  & b_{13}\\
@@ -25,7 +26,8 @@ $$
 
 I have choosen a slightly different layout:
 
-$$\mathbf{State} = \left[\begin{array}
+$$
+\mathbf{State} = \left[\begin{array}
 {llll}
 b_{0}  & b_{1}  & b_{2}  & b_{3}\\
 b_{4}  & b_{5}  & b_{6}  & b_{7}\\
