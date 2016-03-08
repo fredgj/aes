@@ -1,5 +1,5 @@
 Advanced Encryption Standard (AES)
-=================================
+==================================
 
 This is an implementation of the [Advanced Encryption
 Standard](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), also known as
@@ -15,6 +15,7 @@ Rather than going for the tradidional state and key layout decribed in
 the AES specification:
 
 .. math::
+
  \mathbf{M} = \left[\begin{array}
  {llll}
  b_{0} & b_{4} & b_{8}  & b_{12}\\
@@ -26,6 +27,7 @@ the AES specification:
 I have choosen a slightly different layout:
 
 .. math::
+
  \mathbf{State} = \left[\begin{array}
  {llll}
  b_{0}  & b_{1}  & b_{2}  & b_{3}\\
@@ -37,6 +39,7 @@ I have choosen a slightly different layout:
 and a similar one dimensional layout for the key:
 
 .. math::
+
  \mathbf{Key} = \left[\begin{array}
  {llll}
  b_{0}  & ...  & b_{n}
