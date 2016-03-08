@@ -1,4 +1,4 @@
-Advanced Enryption Standard (AES)
+Advanced Encryption Standard (AES)
 =================================
 
 This is an implementation of the [Advanced Encryption
