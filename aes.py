@@ -237,8 +237,8 @@ def valid_key(key, keysize):
 
 
 # initialize state and roundkey
-def init(block, key, _format):
-    if _format == 'x':
+def init(block, key, format_):
+    if format_ == 'x':
         key = [chr(int(k,16)) for k in chunkify(key,2)]
         block = [chr(int(b,16)) for b in chunkify(block,2)]
 
@@ -262,20 +262,20 @@ def init(block, key, _format):
 
 
 # takes a state as input and returns the state as a string
-def strify(state, _format):
+def strify(state, format_):
     state = (b for s in state for b in s)
 
-    if _format == 'x':
+    if format_ == 'x':
         return ''.join(format(e,'02x') for e in state)
 
-    return ''.join(str(e) for e in encrypted)
+    return ''.join(chr(e) for e in state)
 
 
 # Takes a 128 bit block of plaintext and a key (128, 192 or 256 bit)
 # and returns ciphertext.
 # Format is either b for byte or x for hex
-def encrypt(block, key, _format='b'):
-    state, roundkey, nr = init(block, key, _format)
+def encrypt(block, key, format_='b'):
+    state, roundkey, nr = init(block, key, format_)
     state = add_roundkey(0, roundkey, state)
     
     # round 1..nr
@@ -290,14 +290,14 @@ def encrypt(block, key, _format='b'):
     state = shift_rows(state)
     state = add_roundkey(nr, roundkey, state)
 
-    return strify(state, _format)
+    return strify(state, format_)
 
 
 # Takes a 128 bit block of ciphertext and a key (128, 192 or 256 bit)
 # and returns plaintext
 # Format is either b for byte or x for hex
-def decrypt(block, key, _format='b'):
-    state, roundkey, nr = init(block, key, _format)
+def decrypt(block, key, format_='b'):
+    state, roundkey, nr = init(block, key, format_)
     state = add_roundkey(nr, roundkey, state)
 
     # round nr-1..0
@@ -312,5 +312,5 @@ def decrypt(block, key, _format='b'):
     state = inv_sub_bytes(state)
     state = add_roundkey(0, roundkey, state)
 
-    return strify(state, _format)
+    return strify(state, format_)
 
